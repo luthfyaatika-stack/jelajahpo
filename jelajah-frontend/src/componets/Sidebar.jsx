@@ -5,6 +5,9 @@ export default function Sidebar() {
         <div className="bg-light p-3 border-end col-3 min-vh-100">
             <ul className="nav flex-column">
                 <li className="nav-item">
+                    <Link to="/tentang" className="btn btn-link text-start w-100">tentang</Link>
+                </li>
+                <li className="nav-item">
                     <Link to="/wisata" className="btn btn-link text-start w-100">Wisata</Link>
                 </li>
                 <li className="nav-item">
