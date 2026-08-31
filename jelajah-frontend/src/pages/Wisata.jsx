@@ -19,4 +19,45 @@ export default function Wisata() {
     useEffect(() => {
         getWisata();
     }, []);
+//////////////////////TAMPILKAN LOADING DAN TABEL WISATA////////////////
+if (loading) {
+    return <div className="container mt-4">Sedang memuat data....</div>
+  }
+
+  return (
+    <div className="container mt-4">
+        <div className="d-flex justify-content-between align-items-center mb-3">
+            <h2>Daftar Wisata jelajahpo </h2>
+        </div>
+        <table className="table table-bordered table-striped">
+            <thead className="table-primary">
+                <tr>
+                    <th>ID</th>
+                    <th>Nama Wisata</th>
+                    <th>Deskripsi</th>
+                    <th>Harga Tiket</th>
+                </tr>
+            </thead>
+            <tbody>
+                {wisata.length > 0 ? (
+                    wisata.map((item) => (
+                        <tr key={item.id_wisata}>
+                            <td>{item.id_wisata}</td>
+                            <td>{item.nama_wisata}</td>
+                            <td>{item.deskripsi}</td>
+                            <td>Rp {item.harga_tiket}</td>
+                        </tr>
+                    ))
+                ) : (
+                    <tr>
+                        <td colSpan="4" className="text-center">
+                            Belum ada wisata
+                        </td>
+                    </tr>
+                )}
+            </tbody>
+        </table>
+    </div>
+  );
 }
+
