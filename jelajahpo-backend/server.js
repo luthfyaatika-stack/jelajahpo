@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2");
+const { error } = require("cros/common/logger");
 
 const app = express();
 const PORT = 5000;
@@ -77,9 +78,35 @@ db.query(
         });
     }
 );
-
-
 });
+
+//======================PUT WISATA=============================//
+app.put('/wisata/:id_wisata', (req, res) => {
+    const { id_wisata } = req.params;
+    const { nama_wisata, deskripsi, harga_tiket, id_kategori } = req.body;
+
+    if (!nama_wisata || !harga_tiket) {
+        return res.status(400).json({ message: 'Nama wisata dan harga_tiket wajib diisi' });
+    }
+
+    const sql = 'UPDATE wisata SET nama_wisata=?, deskripsi=?, harga_tiket=?, id_kategori=? WHERE id_wisata=?';
+    db.query(sql, [nama_wisata, deskripsi, harga_tiket, id_kategori, id_wisata], (err, results) => {
+        if (err) return res.status(500).json({ error: err.sqlMessage });
+        res.json({ message: 'Wisata berhasil diupdate!' });
+    });
+});
+//=====================PUT WISATA=====================//
+
+//====================DELETE WISATA====================//
+app.delete('/wisata/:id_wisata', (req, res) => {
+    const { id_wisata } = req.params;
+    const sql = 'DELETE FROM wisata WHERE id_wisata';
+    db.query(sql, [id_wisata], (err, results) => {
+        if (err) return res.status(500).json({ error: err.sqlMessage });
+        res.json({ message: 'List wisata berhasil dihapus!' });
+    });
+});
+//==================DELETE WISATA=======================//
 
 
 // ==================== GET KATEGORI ====================
