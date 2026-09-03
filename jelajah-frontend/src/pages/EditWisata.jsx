@@ -16,70 +16,73 @@ export default function EditWisata() {
 
   // ==================== AMBIL DATA WISATA ====================
   useEffect(() => {
-const getDetailWisata = async () => {
-try {
-console.log("ID WISATA:", id_wisata);
+    const getDetailWisata = async () => {
+      try {
+        console.log("ID WISATA:", id_wisata);
 
-  const res = await fetch(
-    `http://localhost:5000/wisata/${id_wisata}`
-  );
+        const res = await fetch(
+          `http://localhost:5000/wisata/${id_wisata}`
+        );
 
-  console.log("STATUS SERVER:", res.status);
+        console.log("STATUS SERVER:", res.status);
 
-  const data = await res.json();
+        const data = await res.json();
 
-  console.log("DATA DARI SERVER:", data);
+        console.log("DATA DARI SERVER:", data);
 
-  if (!res.ok) {
-    throw new Error(
-      data.message ||
-      data.error ||
-      "Gagal mengambil data wisata"
-    );
-  }
+        if (!res.ok) {
+          throw new Error(
+            data.message ||
+            data.error ||
+            "Gagal mengambil data wisata"
+          );
+        }
 
-  const wisata = Array.isArray(data) ? data[0] : data;
+        const wisata = Array.isArray(data) ? data[0] : data;
 
-  setFormData({
-    nama_wisata: wisata.nama_wisata || "",
-    deskripsi: wisata.deskripsi || "",
-    harga_tiket: wisata.harga_tiket || "",
-    id_kategori: wisata.id_kategori || "",
-  });
+        setFormData({
+          nama_wisata: wisata.nama_wisata || "",
+          deskripsi: wisata.deskripsi || "",
+          harga_tiket: wisata.harga_tiket || "",
+          id_kategori: wisata.id_kategori || "",
+        });
 
-} catch (err) {
-  console.error("ERROR GET:", err);
-  alert(err.message);
-} finally {
-  setLoading(false);
-}
+      } catch (err) {
+        console.error("ERROR GET:", err);
+        alert(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-};
-
-getDetailWisata();
-}, [id_wisata]);
-
+    getDetailWisata();
+  }, [id_wisata]);
 
   // ==================== HANDLE INPUT ====================
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
-    });
+    }));
   };
 
   // ==================== SIMPAN PERUBAHAN ====================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // KONFIRMASI SEBELUM UPDATE
     const yakin = window.confirm(
-      "Yakin ingin menyimpan perubahan?"
+      "Yakin mau menyimpan perubahan ini?"
     );
 
-    if (!yakin) return;
+    // JIKA KLIK CANCEL, DATA TIDAK DIKIRIM
+    if (!yakin) {
+      return;
+    }
 
+    // JIKA KLIK OK, BARU DATA DIUPDATE
     try {
       console.log("DATA DIKIRIM:", formData);
 
@@ -99,13 +102,18 @@ getDetailWisata();
       console.log("RESPONSE UPDATE:", data);
 
       if (!res.ok) {
-        alert(data.message || data.error || "Gagal memperbarui wisata");
+        alert(
+          data.message ||
+          data.error ||
+          "Gagal memperbarui wisata"
+        );
         return;
       }
 
       alert("Wisata berhasil diperbarui!");
 
       navigate("/wisata");
+
     } catch (err) {
       console.error("ERROR UPDATE:", err);
 
