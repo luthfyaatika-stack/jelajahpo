@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2");
 const bcrypt = require("bcrypt");
+const { error } = require("cros/common/logger");
 
 const app = express();
 const PORT = 5000;
@@ -69,6 +70,14 @@ app.get("/wisata/:id_wisata", (req, res) => {
   });
 });
 
+app.get('/wisata/:id_wisata', (req, res) => {
+    const { id_wisata } = req.params;
+    const sql = 'SELECT * FROM wisata WHERE id_wisata = ?';
+    db.query(sql, [id_wisata], (err, result) => {
+        if (err) return res.status(500).json({ error: err });
+        res.json(result);
+    });
+});
 // ==================== POST WISATA ====================
 app.post("/wisata", (req, res) => {
   const {
@@ -95,8 +104,6 @@ app.post("/wisata", (req, res) => {
     [nama_wisata, deskripsi, harga_tiket, id_kategori],
     (err, results) => {
       if (err) {
-        console.error(err);
-
         return res.status(500).json({
           error: err.sqlMessage,
         });
@@ -129,11 +136,10 @@ app.put("/wisata/:id_wisata", (req, res) => {
 
   const sql = `
     UPDATE wisata
-    SET
-      nama_wisata = ?,
-      deskripsi = ?,
-      harga_tiket = ?,
-      id_kategori = ?
+    SET nama_wisata = ?,
+        deskripsi = ?,
+        harga_tiket = ?,
+        id_kategori = ?
     WHERE id_wisata = ?
   `;
 
@@ -206,64 +212,82 @@ app.get("/kategori", (req, res) => {
   });
 });
 
-// ==================== TAMBAH PENGGUNA ====================
+// ==================== DAFTAR PENGGUNA ====================
 app.post("/pengguna", async (req, res) => {
   const { nama, email, password } = req.body;
 
   // Validasi
   if (!nama || !email || !password) {
     return res.status(400).json({
-      message: "Nama, email, dan password wajib diisi",
+      message: "Nama, email, dan password wajib diisi!",
     });
   }
 
-  try {
-    // Hash password
-    const passwordHash = await bcrypt.hash(password, 10);
+  // Cek apakah email sudah terdaftar
+  const cekEmail = "SELECT * FROM pengguna WHERE email = ?";
 
-    const sql = `
-      INSERT INTO pengguna
-      (nama, email, password)
-      VALUES (?, ?, ?)
-    `;
+  db.query(cekEmail, [email], async (err, results) => {
+    if (err) {
+      console.error(err);
 
-    db.query(
-      sql,
-      [nama, email, passwordHash],
-      (err, result) => {
-        if (err) {
-          console.error(err);
+      return res.status(500).json({
+        message: "Terjadi kesalahan saat mengecek email",
+      });
+    }
 
-          // Jika email sudah ada
-          if (err.code === "ER_DUP_ENTRY") {
-            return res.status(400).json({
-              message: "Email sudah terdaftar",
+    // Jika email sudah ada
+    if (results.length > 0) {
+      return res.status(400).json({
+        message: "Email sudah terdaftar! Gunakan email lain.",
+      });
+    }
+
+    try {
+      // Hash password
+      const passwordHash = await bcrypt.hash(password, 10);
+
+      const sql = `
+        INSERT INTO pengguna
+        (nama, email, password)
+        VALUES (?, ?, ?)
+      `;
+
+      db.query(
+        sql,
+        [nama, email, passwordHash],
+        (err, result) => {
+          if (err) {
+            console.error(err);
+
+            // Pengaman jika email ternyata sama
+            if (err.code === "ER_DUP_ENTRY") {
+              return res.status(400).json({
+                message: "Email sudah terdaftar!",
+              });
+            }
+
+            return res.status(500).json({
+              message: "Gagal mendaftarkan pengguna",
             });
           }
 
-          return res.status(500).json({
-            message: err.sqlMessage,
+          return res.status(201).json({
+            message: "Pendaftaran berhasil!",
+            id_pengguna: result.insertId,
           });
         }
+      );
+    } catch (error) {
+      console.error(error);
 
-        return res.status(201).json({
-          message: "Pengguna berhasil ditambahkan",
-          id_pengguna: result.insertId,
-        });
-      }
-    );
-  } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      message: "Terjadi kesalahan pada server",
-    });
-  }
+      return res.status(500).json({
+        message: "Terjadi kesalahan pada server",
+      });
+    }
+  });
 });
 
 // ==================== JALANKAN SERVER ====================
 app.listen(PORT, () => {
-  console.log(
-    `Server Jelajahpo jalan di http://localhost:${PORT}`
-  );
+  console.log(`Server Jelajahpo jalan di http://localhost:${PORT}`);
 });

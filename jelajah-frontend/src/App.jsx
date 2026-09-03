@@ -6,6 +6,7 @@ import Wisata from "./pages/Wisata";
 import AddWisata from "./pages/AddWisata";
 import Tentang from "./pages/Tentang";
 import Kategori from "./pages/Kategori";
+import EditWisata from "./pages/EditWisata";
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
           <Route path="wisata/tambah" element={<AddWisata />} />
           <Route path="tentang" element={<Tentang />} />
           <Route path="kategori" element={<Kategori />} />
+          <Route path="/wisata/edit/:id_wisata" element={<EditWisata />} />
         </Route>
       </Routes>
     </BrowserRouter>
