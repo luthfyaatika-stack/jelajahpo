@@ -4,6 +4,7 @@ const mysql = require("mysql2");
 const bcrypt = require("bcrypt");
 const { error } = require("cros/common/logger");
 const jwt = require('jsonwebtoken');
+const authJWT = require('./middleware');
 
 const app = express();
 const PORT = 5000;
